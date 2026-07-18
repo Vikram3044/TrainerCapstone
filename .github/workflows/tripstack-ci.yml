@@ -121,6 +121,10 @@ jobs:
           if [ -d artifacts/api-allure-report ]; then cp -R artifacts/api-allure-report/* site/; fi
           if [ -d artifacts/ui-allure-results ]; then mkdir -p site/ui; cp -R artifacts/ui-allure-results site/ui/; fi
           echo '<!doctype html><html><body><h1>TripStack Test Reports</h1><p>See the uploaded artifacts in Actions.</p></body></html>' > site/index.html
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
