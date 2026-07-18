@@ -122,15 +122,20 @@ jobs:
           if [ -d artifacts/ui-allure-results ]; then mkdir -p site/ui; cp -R artifacts/ui-allure-results site/ui/; fi
           echo '<!doctype html><html><body><h1>TripStack Test Reports</h1><p>See the uploaded artifacts in Actions.</p></body></html>' > site/index.html
       - name: Configure GitHub Pages
+        id: configure-pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
       - name: Upload Pages artifact
+        if: steps.configure-pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.configure-pages.outcome == 'success'
+        continue-on-error: true
         uses: actions/deploy-pages@v4
       - name: Report link
         if: always()
@@ -139,6 +144,12 @@ jobs:
           OWNER="${{ github.repository_owner }}"
           REPORT_URL="https://${OWNER}.github.io/${REPO_NAME}/"
 
-          echo "✅ GitHub Pages deployment completed"
-          echo "📊 Report: ${REPORT_URL}"
-          echo "📊 Report: [Open TripStack report](${REPORT_URL})" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.deployment.outcome }}" == "success" ]]; then
+            echo "✅ GitHub Pages deployment completed"
+            echo "📊 Report: ${REPORT_URL}"
+            echo "📊 Report: [Open TripStack report](${REPORT_URL})" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "⚠️ GitHub Pages deployment could not be completed."
+            echo "Please enable GitHub Pages in the repository settings or grant the workflow the required Pages permissions."
+            echo "📌 Repository settings: https://github.com/${OWNER}/${REPO_NAME}/settings/pages" >> "$GITHUB_STEP_SUMMARY"
+          fi
