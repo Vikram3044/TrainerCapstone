@@ -122,9 +122,19 @@ jobs:
           if [ -d artifacts/ui-allure-results ]; then mkdir -p site/ui; cp -R artifacts/ui-allure-results site/ui/; fi
           echo '<!doctype html><html><body><h1>TripStack Test Reports</h1><p>See the uploaded artifacts in Actions.</p></body></html>' > site/index.html
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Report link
+        if: always()
+        run: |
+          REPO_NAME="${{ github.event.repository.name }}"
+          OWNER="${{ github.repository_owner }}"
+          REPORT_URL="https://${OWNER}.github.io/${REPO_NAME}/"
+
+          echo "✅ GitHub Pages deployment completed"
+          echo "📊 Report: ${REPORT_URL}"
+          echo "📊 Report: [Open TripStack report](${REPORT_URL})" >> "$GITHUB_STEP_SUMMARY"
